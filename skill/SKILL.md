@@ -17,7 +17,7 @@ COMMENT @end-claude-header
 
 **IDs:** Sequential integers: `1`, `2`, `3`. Class/object members: `3a`, `3b`, `3c`. NOT prefixed (`F0`, `E1`, `H2`).
 
-**Types:** `fn` `cls` `mtd` `prop` `const` `var` `type` `iface` `enum` `exp` `imp`
+**Types:** `fn` `cls` `mtd` `prop` `const` `var` `type` `iface` `enum` `exp` `exp-type` `exp-default` `imp`
 
 **Params:** Names only. NO types. `sanitizeUser(user)` not `sanitizeUser(user:PrismaUser)`.
 
@@ -70,7 +70,7 @@ For documents, condense content — not just headings. Telegraphic style, key-va
 <!-- @end-claude-header -->
 ```
 
-**Doc rules:** Max ~5-8% of original tokens, cap 2000 tokens. Preserve: numbers, names, dates, decisions. Drop: narrative, adjectives, justifications.
+**Doc rules:** Max ~5-8% of original tokens, cap 2000 tokens. Preserve: numbers, names, dates, decisions. Drop: narrative, adjectives, justifications. Collapse h3 subsections into parent h2 line when content is brief — use separate entries only when a subsection has substantial unique data.
 
 ## Comment Syntax
 
