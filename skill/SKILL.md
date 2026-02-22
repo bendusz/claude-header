@@ -1,15 +1,15 @@
 ---
 name: claude-header
-description: Use when asked to add or update claude-header blocks, or when reading a file containing @claude-header.
+description: Use when asked to add, update, or generate claude-header blocks on files. Also use when reading a file that contains @claude-header — read header first with limit, then decide whether to read more.
 ---
 
 # claude-header
 
-Ultra-dense file headers so agents understand file contents without reading the full file.
+Generate ultra-dense file headers that let agents understand file contents without reading the full file. Protects context window.
 
 ## Before Generating
 
-Ask user whether to dispatch a subagent (recommended — protects main context window). If yes, dispatch `general-purpose` subagent with full skill text + file path.
+When asked to generate a claude-header, ask the user whether to dispatch a subagent for the work (recommended). Subagents protect the main context window — which is the whole point of this skill. If the user agrees, dispatch a `general-purpose` subagent with the full skill text and the file path.
 
 ## Format
 
@@ -19,7 +19,7 @@ COMMENT ID:TYPE:name(params)[startLine-endLine]->returnType deps:ID,ID optional-
 COMMENT @end-claude-header
 ```
 
-**IDs:** Sequential integers: `1`, `2`, `3`. Members: `3a`, `3b`, `3c`. NOT prefixed (`F0`, `E1`, `H2`).
+**IDs:** Sequential integers: `1`, `2`, `3`. Class/object members: `3a`, `3b`, `3c`. NOT prefixed (`F0`, `E1`, `H2`).
 
 **Types:** `fn` `cls` `mtd` `prop` `const` `var` `type` `iface` `enum` `exp` `exp-type` `exp-default` `imp`
 
@@ -60,6 +60,8 @@ COMMENT @end-claude-header
 
 ## Doc Example
 
+For documents, condense content — not just headings. Telegraphic style, key-value data, drop narrative.
+
 ```yaml
 ---
 claude-header: v1 PLAN:acme-series-a
@@ -76,12 +78,12 @@ index:
 
 **Doc condensation rules:**
 - Max ~5-8% of original tokens, cap 2000 tokens
-- **Behavior-only retention:** Keep only facts that change actions/outputs. Drop narrative, adjectives, justifications
-- **Deduplication:** Same fact in multiple sections? Capture once where most relevant
-- **Date/number normalization:** `Mar-2023` not `March 2023`, `$2.4M` not `$2,400,000`, `+176%` not `grew by 176 percent`
-- **Audience stripping:** Drop filler: "note that", "importantly", "as mentioned", "please consider"
-- **Constraint ordering:** For spec docs, hard constraints first per section, soft preferences after
-- Collapse h3 into parent h2 when brief
+- **Behavior-only retention:** Keep only facts that change actions/outputs. Drop narrative, adjectives, justifications, explanatory prose
+- **Deduplication:** If same fact appears in multiple sections, capture once in the most relevant section
+- **Date/number normalization:** Compact formats: `Mar-2023` not `March 2023`, `$2.4M` not `$2,400,000`, `+176%` not `grew by 176 percent`
+- **Audience stripping:** Drop human-facing filler: "note that", "importantly", "as mentioned", "it's worth noting", "please consider"
+- **Constraint ordering:** For requirement/spec docs, put hard constraints and decisions first per section, soft preferences after
+- Collapse h3 subsections into parent h2 line when content is brief — use separate entries only when a subsection has substantial unique data
 
 ## Comment Syntax
 
@@ -96,26 +98,28 @@ index:
 
 ## Generation Rules
 
-**Order:** imports → symbols in source order → class members as sub-items → exports last.
+**Order:** imports → top-level symbols in source order → class members as sub-items → exports last.
 
-**Include:** Functions, classes, types, interfaces, enums, exported constants.
+**Include:** All functions, classes, types, interfaces, enums, exported constants.
 
-**Exclude:** Local variables, implementation details, comments, boilerplate.
+**Exclude:** Local variables, implementation details, source comments, obvious boilerplate.
 
-**Nesting:** Flatten to max 2 levels. Sub-item notation (`11a`).
+**Nested functions:** Flatten to max 2 levels. Use sub-item notation (`11a`).
 
-**Line numbers:** Insert header, then adjust ALL line numbers by header line count.
+**Line numbers:** Generate header, insert at top, then adjust ALL line numbers by header line count in a single pass.
 
-**Skip:** Files <30 lines. Generated/binary files. Update = full regeneration.
+**Skip:** Files under 30 lines. Generated/binary files. Update = full regeneration.
 
 ## Reading a File with @claude-header
 
-**Scan (default):** Read ONLY header via `Read` with `limit` = header line count.
+When you encounter `@claude-header` in a file:
 
-**Target:** `Read` with `offset`/`limit` for specific line range + deps from header.
+**Default (Scan):** Read ONLY the header using `Read` with `limit` set to header line count. This gives you full file understanding without consuming context on the body.
 
-**Full:** Major refactors only. Rare.
+**Target:** Need to edit a specific symbol? Read its line range from the header, then `Read` with `offset` and `limit` for just that section. Follow `deps:` to read dependencies too.
+
+**Full:** Only for major refactors requiring full-file understanding. Rare.
 
 ## Large Documents (>3000 lines)
 
-Chunk: read ~60K tokens, generate header, spawn continuation agent with header-so-far + file path + continue-from line. Merge. Mark: `(cont:L342)`.
+Read first ~60K tokens, generate header for that portion. Spawn continuation agent with: header-so-far, file path, line to continue from. Merge results. Mark boundaries: `(cont:L342)`.
