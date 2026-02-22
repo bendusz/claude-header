@@ -56,16 +56,18 @@ COMMENT @end-claude-header
 
 ## Doc Example
 
-```
-<!-- @claude-header v1 PLAN:acme-series-a -->
-<!-- 1:h1:Executive Summary[7];B2B-SaaS;fintech-compliance;raising-$24M@$120M-pre;founded-Mar2023 -->
-<!-- 2:h2:Market[19];TAM:$12.8B;mid-market:38%=$4.9B;incumbents-enterprise-only;gap-in-mid-market -->
-<!-- 3:h2:Traction[31];ARR:Q1=$2.1M->Q4=$5.8M;customers:38->97;NRR:126%;churn:1.3% -->
-<!-- 4:h2:Product[52];3-modules:Workspace,Forecast,Insights;15%-utilization-improvement -->
-<!-- 5:h2:Financials[68];burn:$680K/mo;runway:26mo;breakeven:Q3-2028@$50M-ARR -->
-<!-- 6:h2:Team[108];CEO:Kessler(ex-Palantir);CTO:Chandrasekaran(ex-Stripe);headcount:42->78 -->
-<!-- 7:h2:Ask[147];$24M@$120M-pre;1-board-seat;close:Mar-15-2026 -->
-<!-- @end-claude-header -->
+```yaml
+---
+claude-header: v1 PLAN:acme-series-a
+index:
+  - "1:h1:Executive Summary[10];B2B-SaaS;fintech-compliance;raising-$24M@$120M-pre;founded-Mar2023"
+  - "2:h2:Market[22];TAM:$12.8B;mid-market:38%=$4.9B;incumbents-enterprise-only;gap-in-mid-market"
+  - "3:h2:Traction[34];ARR:Q1=$2.1M->Q4=$5.8M;customers:38->97;NRR:126%;churn:1.3%"
+  - "4:h2:Product[55];3-modules:Workspace,Forecast,Insights;15%-utilization-improvement"
+  - "5:h2:Financials[71];burn:$680K/mo;runway:26mo;breakeven:Q3-2028@$50M-ARR"
+  - "6:h2:Team[111];CEO:Kessler(ex-Palantir);CTO:Chandrasekaran(ex-Stripe);headcount:42->78"
+  - "7:h2:Ask[150];$24M@$120M-pre;1-board-seat;close:Mar-15-2026"
+---
 ```
 
 **Doc condensation rules:**
@@ -84,7 +86,8 @@ COMMENT @end-claude-header
 | JS/TS/Go/Rust/Java/C | `// ` per line |
 | Python/Shell/Ruby | `# ` per line |
 | CSS | `/* ... */` block |
-| HTML/MD/XML | `<!-- ... -->` per line |
+| HTML/XML | `<!-- ... -->` per line |
+| Markdown | YAML frontmatter `---` block |
 | SQL | `-- ` per line |
 
 ## Generation Rules
