@@ -1,6 +1,6 @@
 ---
 name: claude-header
-description: Use when asked to add, update, or generate claude-header blocks on files. Also use when reading a file that contains @claude-header — read header first with limit, then decide whether to read more.
+description: Use when asked to add or update claude-header blocks, or when reading a file containing @claude-header.
 ---
 
 # claude-header
@@ -56,8 +56,6 @@ COMMENT @end-claude-header
 
 ## Doc Example
 
-For documents, condense content — not just headings. Telegraphic style, key-value data, drop narrative.
-
 ```
 <!-- @claude-header v1 PLAN:acme-series-a -->
 <!-- 1:h1:Executive Summary[7];B2B-SaaS;fintech-compliance;raising-$24M@$120M-pre;founded-Mar2023 -->
@@ -70,7 +68,14 @@ For documents, condense content — not just headings. Telegraphic style, key-va
 <!-- @end-claude-header -->
 ```
 
-**Doc rules:** Max ~5-8% of original tokens, cap 2000 tokens. Preserve: numbers, names, dates, decisions. Drop: narrative, adjectives, justifications. Collapse h3 subsections into parent h2 line when content is brief — use separate entries only when a subsection has substantial unique data.
+**Doc condensation rules:**
+- Max ~5-8% of original tokens, cap 2000 tokens
+- **Behavior-only retention:** Keep only facts that change actions/outputs. Drop narrative, adjectives, justifications, explanatory prose
+- **Deduplication:** If same fact appears in multiple sections, capture once in most relevant section
+- **Date/number normalization:** Compact formats: `Mar-2023` not `March 2023`, `$2.4M` not `$2,400,000`, `+176%` not `grew by 176 percent`
+- **Audience stripping:** Drop human-facing filler: "note that", "importantly", "as mentioned", "it's worth noting", "please consider"
+- **Constraint ordering:** For requirement/spec docs, put hard constraints and decisions first per section, soft preferences after
+- Collapse h3 into parent h2 when content is brief
 
 ## Comment Syntax
 
@@ -84,17 +89,17 @@ For documents, condense content — not just headings. Telegraphic style, key-va
 
 ## Generation Rules
 
-**Order:** imports → top-level symbols in source order → class members as sub-items → exports last.
+**Order:** imports → symbols in source order → class members as sub-items → exports last.
 
 **Include:** All functions, classes, types, interfaces, enums, exported constants.
 
-**Exclude:** Local variables, implementation details, source comments, obvious boilerplate.
+**Exclude:** Local variables, implementation details, source comments, boilerplate.
 
-**Nested functions:** Flatten to max 2 levels. Use sub-item notation (`11a`).
+**Nesting:** Flatten to max 2 levels. Sub-item notation (`11a`).
 
-**Line numbers:** Generate header, insert at top, then adjust ALL line numbers by header line count in a single pass.
+**Line numbers:** Insert header, then adjust ALL line numbers by header line count.
 
-**Skip:** Files under 30 lines. Generated/binary files. Update = full regeneration.
+**Skip:** Files <30 lines. Generated/binary files. Update = full regeneration.
 
 ## Reading a File with @claude-header
 
@@ -104,8 +109,8 @@ When you encounter `@claude-header` in a file:
 
 **Target:** Read line range from header, then `Read` with `offset`/`limit` for just that section + deps.
 
-**Full:** Only for major refactors requiring full-file understanding. Rare.
+**Full:** Only for major refactors. Rare.
 
 ## Large Documents (>3000 lines)
 
-Read first ~60K tokens, generate header for that portion. Spawn continuation agent with: header-so-far, file path, line to continue from. Merge results. Mark boundaries: `(cont:L342)`.
+Read first ~60K tokens, generate header. Spawn continuation agent with: header-so-far, file path, continue-from line. Merge. Mark boundaries: `(cont:L342)`.
