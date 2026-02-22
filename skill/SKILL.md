@@ -5,7 +5,7 @@ description: Use when asked to add, update, or generate claude-header blocks on 
 
 # claude-header
 
-Generate ultra-dense file headers that let agents understand file contents without reading the full file. Protects context window.
+Ultra-dense file headers so agents understand file contents without reading the full file.
 
 ## Format
 
@@ -100,9 +100,9 @@ For documents, condense content — not just headings. Telegraphic style, key-va
 
 When you encounter `@claude-header` in a file:
 
-**Default (Scan):** Read ONLY the header using `Read` with `limit` set to header line count. This gives you full file understanding without consuming context on the body.
+**Default (Scan):** Read ONLY the header using `Read` with `limit` set to header line count.
 
-**Target:** Need to edit a specific symbol? Read its line range from the header, then `Read` with `offset` and `limit` for just that section. Follow `deps:` to read dependencies too.
+**Target:** Read line range from header, then `Read` with `offset`/`limit` for just that section + deps.
 
 **Full:** Only for major refactors requiring full-file understanding. Rare.
 
